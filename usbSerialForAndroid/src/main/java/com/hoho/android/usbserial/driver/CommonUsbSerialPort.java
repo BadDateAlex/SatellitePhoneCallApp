@@ -230,12 +230,16 @@ public abstract class CommonUsbSerialPort implements UsbSerialPort {
     @Override
     public void write(final byte[] src, final int timeout) throws IOException {
         int offset = 0;
+        int cnt=0;
         final long endTime = (timeout == 0) ? 0 : (MonotonicClock.millis() + timeout);
 
         if(mConnection == null) {
             throw new IOException("Connection closed");
         }
-        while (offset < src.length) {
+        int temp=1;
+        // while (offset < src.length)
+        while (temp==1) {
+            temp=0;
             int requestTimeout;
             final int requestLength;
             final int actualLength;
@@ -249,7 +253,8 @@ public abstract class CommonUsbSerialPort implements UsbSerialPort {
                 requestLength = Math.min(src.length - offset, mWriteBuffer.length);
                 if (offset == 0) {
                     writeBuffer = src;
-                } else {
+                }
+                else {
                     // bulkTransfer does not support offsets, make a copy.
                     System.arraycopy(src, offset, mWriteBuffer, 0, requestLength);
                     writeBuffer = mWriteBuffer;
@@ -265,11 +270,11 @@ public abstract class CommonUsbSerialPort implements UsbSerialPort {
                     actualLength = -2;
                 }
                 else {
-                    //Log.d("LGC_TEST","endpoint:"+mWriteEndpoint.getEndpointNumber());
-//                    //用于结尾添加\r,(0x0d)
-//                    byte[] newArray = new byte[writeBuffer.length + 1];
-//                    System.arraycopy(writeBuffer, 0, newArray, 0, writeBuffer.length);
-//                    newArray[newArray.length-1]=0x0D;
+                    Log.d("LGC_TEST","endpoint:"+mWriteEndpoint.getEndpointNumber());
+                    //用于结尾添加\r,(0x0d)
+                    byte[] newArray = new byte[writeBuffer.length + 1];
+                    System.arraycopy(writeBuffer, 0, newArray, 0, writeBuffer.length);
+                    newArray[newArray.length-1]=0x0D;
                     int i=0;
                     byte[] tempBuffer=writeBuffer;
                     int my_len=writeBuffer.length;
@@ -285,9 +290,12 @@ public abstract class CommonUsbSerialPort implements UsbSerialPort {
                         }
                         i++;
                     }
+
+                    cnt++;
+                    Log.d("LGC_TEST","times"+(cnt));
                     actualLength = mConnection.bulkTransfer(mWriteEndpoint, tempBuffer, tempBuffer.length, requestTimeout);
                     //mConnection.bulkTransfer(mReadEndpoint,null, 0, requestTimeout);
-                }
+               }
              }
             if (DEBUG) {
                 Log.d(TAG, "Wrote " + actualLength + "/" + requestLength + " offset " + offset + "/" + src.length + " timeout " + requestTimeout);

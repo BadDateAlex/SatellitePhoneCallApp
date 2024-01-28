@@ -291,10 +291,12 @@ public class TerminalFragment extends Fragment implements SerialInputOutputManag
             return;
         }
         try {
-        byte[] data = (str + '\n').getBytes();
+        //byte[] data = (str + '\n').getBytes();
+            byte[] data = (str).getBytes();
+
             SpannableStringBuilder spn = new SpannableStringBuilder();
             spn.append("send " + data.length + " bytes\n");
-            Log.d(TAG,str);
+            //Log.d(TAG,str);
             spn.append(HexDump.dumpHexString(data)).append("\n");
             spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorSendText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             receiveText.append(spn);
